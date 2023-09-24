@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DOĞAN OPTİK DEMO</title>
+    <meta charset='utf-8' />
+
+    <!-- Pinch ile yeniden boyutlandırmayı IOS Safari'de engelle: -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+    
+    <!-- ANA SCRIPT'İ EKLE: -->
+    <script src='dist/JeelizVTOWidget.js'></script>
+
+    <!-- Simgeler için çerçeve veya tuvali yeniden boyutlandırın -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+
+    <!-- Başlık için font: -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+    
+    <!-- Ana stil sayfası: -->
+    <link rel='stylesheet' href='css/JeelizVTOWidget.css' />
+
+    <script>
+      let _isResized = false;
+
+      function test_resizeCanvas() {
+        // Yüksekliği yarıya indirir:
+        let halfHeightPx = Math.round(window.innerHeight / 2).toString() + 'px';
+        
+        const domWidget = document.getElementById('JeelizVTOWidget');
+        domWidget.style.maxHeight = (_isResized) ? 'none' : halfHeightPx;
+
+        _isResized = !_isResized;
+      }
+
+
+      function get_initialSKU(){
+        // URL parametreleri olarak bir SKU sağlanıp sağlanmadığını kontrol edin:
+        const queryString = window.location.search;
+        const URLParams = new URLSearchParams(queryString);
+        const sku = URLParams.get('sku') || 'rayban_aviator_or_vertFlash';
+        console.log('Başlangıç SKU\'su =', sku);
+        return sku;
+      }
+
+
+      function get_isShadow(){
+        const queryString = window.location.search;
+        const URLParams = new URLSearchParams(queryString);
+        return URLParams.get('isHideShadow') ? false : true;
+      }
+
+
+      // Giriş noktası:
+      function main() {
+        JEELIZVTOWIDGET.start({
+          isShadow: get_isShadow(),
+          sku: get_initialSKU(),
+          searchImageMask: 'https://appstatic.jeeliz.com/jeewidget/images/target.png',
+          searchImageColor: 0xeeeeee,
+          callbackReady: function(){
+            console.log('BİLGİ: JEELIZVTOWIDGET hazır :)');
+
+            // Video renderini değiştirmek için bir LUT ekleyin:
+            //JEELIZVTOWIDGET.set_LUT('images/LUTs/LUTGrayscale.png');
+            //JEELIZVTOWIDGET.set_LUT('images/LUTs/LUTImprove.jpg');
+          },
+          onError: function(errorLabel){ // Bu işlev hataları yakalar, böylece özelleştirilmiş entegre mesajlar görüntüleyebilirsiniz
+            alert('Bir hata oluştu. Hata etiketi =' + errorLabel)
+            switch(errorLabel) {
+              case 'WEBCAM_UNAVAILABLE':
+                // Kullanıcının kamerası yok veya paylaşmak istemiyor.
+                break;
+          
+              case 'NOFILE':
+                // Kullanıcı bir resim gönderdi, ancak resim yok
+                break;
+
+              case 'WRONGFILEFORMAT':
+                // Kullanıcı bir resim olmayan veya bozuk bir dosya yükledi
+                break;
+
+              case 'INVALID_SKU':
+                // Sağlanan SKU, bir gözlük modeliyle eşleşmiyor
+                break;
+
+              case 'FALLBACK_UNAVAILABLE':
+                // Dosya yükleme moduna geçemiyoruz. Tarayıcı çok eski mi?
+                break;
+
+              case 'PLACEHOLDER_NULL_WIDTH':
+              case 'PLACEHOLDER_NULL_HEIGHT':
+                // Placeholder ile bir sorun var
+                // (id='JeelizVTOWidget' olan öğe)
+                break;
+                
+              case 'FATAL':
+              default:
+                // Bir hata oluştu:(
+                break;
+            } // anahtar kelimeyi sonlandır
+          } // onError()
+        }) // JEELIZVTOWIDGET.start çağrısını sonlandır
+      } // main() sonlandır
+
+
+      function load_modelBySKU(){
+        const sku = prompt('Lütfen bir gözlük model SKU\'su girin:', 'rayban_wayfarer_havane_marron');
+        if (sku){
+          JEELIZVTOWIDGET.load(sku);
+        }
+      }
+
+    </script>
+  </head>
+
+  <body onload="main()">
+    <div class='content'>
+
+
+      <div class='header'>
+        <div class="headerTitle">
+          ETHEM OPTİK
+        </div>      
+      </div>
+
+
+      <!-- Lütfen JEELIZVTOWIDGET tarafından çıkarılabilsin diye aynı öğe kimliklerini koruyun -->
+
+      <!-- JEELIZVTOWIDGET BAŞLANGIÇ -->
+      <!-- 
+        id='JeelizVTOWidget' olan div, VTO widget'ın nerede olması gerektiğine göre boyutlandırmanız ve konumlandırmanız gereken yerdir
+        boyutunu değiştirirseniz, widget otomatik olarak yeniden boyutlandırılır
+      -->
+      <div id='JeelizVTOWidget'>
+        <!-- ANA CANVAS: -->
+        <!-- 
+         id='JeelizVTOWidgetCanvas' olan canvas, VTO widget'ın render edileceği tuvaldir
+         boyutunu değiştirmek için toplam boyutu değiştirmemek için CSS özelliği olarak position: absolute olmalıdır
+        -->
+        <canvas id='JeelizVTOWidgetCanvas'></canvas>
+        
+        <div class='JeelizVTOWidgetControls JeelizVTOWidgetControlsTop'>
+          <!-- AYAR DÜĞMESİ: -->
+          <button id='JeelizVTOWidgetAdjust'>
+            <div class="buttonIcon"><i class="fas fa-arrows-alt"></i></div>Ayarla
+          </button>
+
+          <!-- WIDGET'ı YENİDEN BOYUTLANDIRMA DÜĞMESİ: -->
+          <button id='buttonResizeCanvas' onclick='test_resizeCanvas();'>
+            <div class="buttonIcon"><i class="fas fa-sync-alt"></i></div>Widget'ı Yeniden Boyutlandır
+          </button>
+        </div>
+
+        <!-- MODELİ DEĞİŞTİR DÜĞMELERİ: -->
+        <div class='JeelizVTOWidgetControls' id='JeelizVTOWidgetChangeModelContainer'>
+          <button onclick="JEELIZVTOWIDGET.load('rayban_aviator_or_vertFlash')">Model 1</button>
+          <button onclick="JEELIZVTOWIDGET.load('rayban_round_cuivre_pinkBrownDegrade')">Model 2</button>
+          <button onclick="JEELIZVTOWIDGET.load('blaze_wayfarer_bleu_bleudegrademiroir')">Model 3</button>
+          <button onclick="load_modelBySKU()">Gözlük modeli girin</button>
+        </div>
+
+        <!-- AYARLA BİLDİRİMİ BAŞLANGICI -->
+        <div id='JeelizVTOWidgetAdjustNotice'>
+          Gözlükleri ayarlamak için hareket ettirin.
+          <button class='JeelizVTOWidgetBottomButton' id='JeelizVTOWidgetAdjustExit'>Çık</button>
+        </div>
+        <!-- AYARLA BİLDİRİMİ SONU -->
+
+        <!-- WIDGET YÜKLEME BAŞLANGICI (model değil) -->
+        <div id='JeelizVTOWidgetLoading'>
+           <div class='JeelizVTOWidgetLoadingText'>
+              YÜKLENİYOR...
+            </div>
+        </div>
+        <!-- WIDGET YÜKLEME SONU -->
+
+      </div>
+    </div>
+
+    
+  </body>
+</html>
